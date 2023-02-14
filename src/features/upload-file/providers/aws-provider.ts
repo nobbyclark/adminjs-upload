@@ -1,4 +1,5 @@
 import fs from 'fs'
+import mime from 'mime'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { S3 } from 'aws-sdk'
 import { UploadedFile } from 'adminjs'
@@ -59,10 +60,13 @@ export class AWSProvider extends BaseProvider {
   public async upload(file: UploadedFile, key: string): Promise<S3.ManagedUpload.SendData> {
     const uploadOptions = { partSize: 5 * 1024 * 1024, queueSize: 10 }
     const tmpFile = fs.createReadStream(file.path)
+    const mimeType = mime.getType(file.path);
+    console.log(mimeType);
     const params: S3.PutObjectRequest = {
       Bucket: this.bucket,
       Key: key,
       Body: tmpFile,
+      ContentType: mimeType
     }
     if (!this.expires) {
       params.ACL = 'public-read'
